@@ -150,7 +150,7 @@
                                                             @break
 
                                                         @default
-                                                            <span class="hide">{{ date('Ymd' ,strtotime($pedido->fecha_entrega)) }}</span>{{ $entrega->formatLocalized("%d de %B") }}
+                                                            <span class="hide">{{ date('Ymd' ,strtotime($pedido->fecha_entrega)) }}</span>{{ $entrega->locale('es')->isoFormat('D [de] MMMM') }}
                                                     @endswitch
                                             </span>
                                         </div>
