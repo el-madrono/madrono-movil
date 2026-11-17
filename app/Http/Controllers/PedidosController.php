@@ -208,6 +208,10 @@ class PedidosController extends Controller
         if (!$pedido->orden) {
             $pedido->orden = 0;
         }
+        if ($this->ordenEntregaDuplicada($pedido->id_usuario, $pedido->orden, $pedido->fecha_ingreso)) {
+            $this->errorOrdenEntrega($pedido->orden, 'crear');
+            return back();
+        }
         $pedido->save();
         if ($empresa->nombre != 'Italcol') {
             if ($request->productos == 'on') {
@@ -445,6 +449,11 @@ class PedidosController extends Controller
             Session::put('error_hora_cierre', compact('titulo', 'mensaje', 'fecha'));
             return back();
         }
+        $orden = $request->has('orden') ? (int) $request->orden : (int) $pedido->orden;
+        if ($this->ordenEntregaDuplicada($pedido->id_usuario, $orden, $pedido->fecha_ingreso, $pedido->id_comercial)) {
+            $this->errorOrdenEntrega($orden, 'cerrar');
+            return back();
+        }
         $pedido->fill($request->all());
 
         if (($usuario->nivel == 'u_ventadirecta' || $usuario->nivel == 'u_callcenter') && $usuario->cliente) {
@@ -494,6 +503,33 @@ class PedidosController extends Controller
             ->whereDate('fecha_no_compra', date('Y-m-d', strtotime($pedido->fecha_ingreso)))
             ->delete();
         return redirect(route('pedidos.show', ['id' => $id]));
+    }
+
+    /**
+     * Indica si el usuario ya tiene otro pedido el mismo día (fecha_ingreso) con ese orden de entrega.
+     * Orden 0 significa "sin orden de entrega" y no se valida.
+     */
+    private function ordenEntregaDuplicada($idUsuario, $orden, $fechaIngreso, $excluirIdComercial = null)
+    {
+        if (!$orden) {
+            return false;
+        }
+
+        return TblPedido::where('id_usuario', $idUsuario)
+            ->where('orden', $orden)
+            ->whereDate('fecha_ingreso', date('Y-m-d', strtotime($fechaIngreso)))
+            ->when($excluirIdComercial, function ($query) use ($excluirIdComercial) {
+                $query->where('id_comercial', '!=', $excluirIdComercial);
+            })
+            ->exists();
+    }
+
+    private function errorOrdenEntrega($orden, $accion)
+    {
+        $titulo = 'Orden de Entrega Repetido';
+        $mensaje = 'No se puede ' . $accion . ' el pedido porque ya existe un pedido del día con el orden de entrega ' . $orden . '.';
+        $fecha = Carbon::now();
+        Session::put('error_orden_entrega', compact('titulo', 'mensaje', 'fecha'));
     }
 
     public function pdf($id) {

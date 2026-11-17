@@ -34,7 +34,7 @@
                                         <span class="mdc-notched-outline">
                                             <span class="mdc-notched-outline__leading"></span>
                                             <span class="mdc-notched-outline__notch">
-                                                <span class="mdc-floating-label" id="lbl_nit">NIT</span>
+                                                <span class="mdc-floating-label" id="lbl_nit">NIT del Cliente</span>
                                             </span>
                                             <span class="mdc-notched-outline__trailing"></span>
                                         </span>
@@ -92,29 +92,6 @@
                                         </div>
                                     @enderror
                                 </div>
-                                <div class="col s12 mb-2">
-                                    <label
-                                        class="mdc-text-field mdc-text-field--outlined mdc-text-field--label-floating {{ $errors->has('direccion_cliente') ? 'mdc-text-field--invalid' : '' }}"
-                                        id="mdc-direccion_cliente">
-                                        <input type="text" class="mdc-text-field__input"
-                                            aria-labelledby="lbl_direccion_cliente" name="direccion_cliente"
-                                            id="direccion_cliente" value="{{ old('direccion_cliente') }}" required>
-                                        <span class="mdc-notched-outline">
-                                            <span class="mdc-notched-outline__leading"></span>
-                                            <span class="mdc-notched-outline__notch">
-                                                <span class="mdc-floating-label" id="lbl_direccion_cliente">Dirección del
-                                                    Cliente</span>
-                                            </span>
-                                            <span class="mdc-notched-outline__trailing"></span>
-                                        </span>
-                                    </label>
-                                    @error('direccion_cliente')
-                                        <div class="mdc-text-field-helper-line">
-                                            <p class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg"
-                                                aria-hidden="false">{{ $message }}</p>
-                                        </div>
-                                    @enderror
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -125,7 +102,7 @@
                 <div class="col s12">
                     <div class="card highlighted">
                         <div class="card-content">
-                            <span class="card-title mb-2">Datos del Documento</span>
+                            <span class="card-title mb-2">Factura Anulada</span>
                             <div class="row mb-0">
                                 <div class="col s12 m4 mb-2">
                                     <label
@@ -243,7 +220,7 @@
                                         </div>
                                     @enderror
                                 </div>
-                                <div class="col s12 m4 mb-2 no-line-height">
+                                <div class="col s12 m4 mb-2">
                                     <div class="mdc-select mdc-select--outlined full-width {{ old('tipo_devolucion') ? 'mdc-select--filled' : '' }}"
                                         id="mdc-select-tipo_devolucion">
                                         <div class="mdc-select__anchor" aria-labelledby="tipo_devolucion-select-label"
@@ -251,8 +228,10 @@
                                             <input type="hidden" name="tipo_devolucion" id="tipo_devolucion"
                                                 class="mdc-select__input-value" value="{{ old('tipo_devolucion') }}"
                                                 required>
-                                            <span id="tipo_devolucion__selected-text"
-                                                class="mdc-select__selected-text"></span>
+                                            <span class="mdc-select__selected-text-container">
+                                                <span id="tipo_devolucion__selected-text"
+                                                    class="mdc-select__selected-text"></span>
+                                            </span>
                                             <span class="mdc-select__dropdown-icon">
                                                 <svg class="mdc-select__dropdown-icon-graphic" viewBox="7 10 10 5">
                                                     <polygon class="mdc-select__dropdown-icon-inactive" stroke="none"
@@ -322,6 +301,95 @@
                 </div>
             </div>
 
+            {{-- Cards opcionales: Nota Crédito (nc_) y Nueva Factura (nf_) --}}
+            @foreach (['nc' => 'Nota Crédito', 'nf' => 'Nueva Factura'] as $prefijo => $tituloCard)
+                <div class="row mb-0">
+                    <div class="col s12">
+                        <div class="card highlighted">
+                            <div class="card-content">
+                                <span class="card-title mb-2">{{ $tituloCard }}</span>
+                                <div class="row mb-0">
+                                    @foreach (['centro_operacion' => 'Centro de Operación', 'tipo_documento' => 'Tipo de Documento', 'numero_documento' => 'Número de Documento'] as $campo => $etiqueta)
+                                        @php $nombre = $prefijo . '_' . $campo; @endphp
+                                        <div class="col s12 m4 mb-2">
+                                            <label
+                                                class="mdc-text-field mdc-text-field--outlined mdc-text-field--label-floating {{ $errors->has($nombre) ? 'mdc-text-field--invalid' : '' }}"
+                                                id="mdc-{{ $nombre }}">
+                                                <input type="text" class="mdc-text-field__input"
+                                                    aria-labelledby="lbl_{{ $nombre }}" name="{{ $nombre }}"
+                                                    id="{{ $nombre }}" value="{{ old($nombre) }}" @if ($prefijo === 'nc') required @endif>
+                                                <span class="mdc-notched-outline">
+                                                    <span class="mdc-notched-outline__leading"></span>
+                                                    <span class="mdc-notched-outline__notch">
+                                                        <span class="mdc-floating-label" id="lbl_{{ $nombre }}">{{ $etiqueta }}</span>
+                                                    </span>
+                                                    <span class="mdc-notched-outline__trailing"></span>
+                                                </span>
+                                            </label>
+                                            @error($nombre)
+                                                <div class="mdc-text-field-helper-line">
+                                                    <p class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg"
+                                                        aria-hidden="false">{{ $message }}</p>
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    @endforeach
+                                    <div class="col s12 m4 mb-2">
+                                        <label
+                                            class="mdc-text-field mdc-text-field--outlined mdc-text-field--label-floating {{ $errors->has($prefijo . '_fecha') ? 'mdc-text-field--invalid' : '' }}"
+                                            id="mdc-{{ $prefijo }}_fecha">
+                                            <input type="date" class="mdc-text-field__input"
+                                                aria-labelledby="lbl_{{ $prefijo }}_fecha" name="{{ $prefijo }}_fecha"
+                                                id="{{ $prefijo }}_fecha" max="{{ now()->toDateString() }}"
+                                                value="{{ old($prefijo . '_fecha') }}" @if ($prefijo === 'nc') required @endif>
+                                            <span class="mdc-notched-outline">
+                                                <span class="mdc-notched-outline__leading"></span>
+                                                <span class="mdc-notched-outline__notch">
+                                                    <span class="mdc-floating-label mdc-floating-label--float-above"
+                                                        id="lbl_{{ $prefijo }}_fecha">Fecha</span>
+                                                </span>
+                                                <span class="mdc-notched-outline__trailing"></span>
+                                            </span>
+                                        </label>
+                                        @error($prefijo . '_fecha')
+                                            <div class="mdc-text-field-helper-line">
+                                                <p class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg"
+                                                    aria-hidden="false">{{ $message }}</p>
+                                            </div>
+                                        @enderror
+                                    </div>
+                                    <div class="col s12 m4 mb-2">
+                                        <label
+                                            class="mdc-text-field mdc-text-field--outlined mdc-text-field--label-floating {{ $errors->has($prefijo . '_valor') ? 'mdc-text-field--invalid' : '' }}"
+                                            id="mdc-{{ $prefijo }}_valor">
+                                            <input type="text" inputmode="numeric" class="mdc-text-field__input js-valor-formato"
+                                                data-target="#{{ $prefijo }}_valor" aria-labelledby="lbl_{{ $prefijo }}_valor"
+                                                id="{{ $prefijo }}_valor_formato"
+                                                value="{{ old($prefijo . '_valor') ? number_format((float) old($prefijo . '_valor'), 0, ',', '.') : '' }}" @if ($prefijo === 'nc') required @endif>
+                                            <span class="mdc-notched-outline">
+                                                <span class="mdc-notched-outline__leading"></span>
+                                                <span class="mdc-notched-outline__notch">
+                                                    <span class="mdc-floating-label" id="lbl_{{ $prefijo }}_valor">Valor</span>
+                                                </span>
+                                                <span class="mdc-notched-outline__trailing"></span>
+                                            </span>
+                                        </label>
+                                        <input type="hidden" name="{{ $prefijo }}_valor" id="{{ $prefijo }}_valor"
+                                            value="{{ old($prefijo . '_valor') }}">
+                                        @error($prefijo . '_valor')
+                                            <div class="mdc-text-field-helper-line">
+                                                <p class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg"
+                                                    aria-hidden="false">{{ $message }}</p>
+                                            </div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+
             <div class="row mb-0">
                 <div class="col s12 right-align">
                     <a class="mdc-button mdc-button--raised mdc-button--large mr-1"
@@ -345,7 +413,6 @@
         // Text fields
         const nit = new mdc.textField.MDCTextField(document.querySelector('#mdc-nit'));
         const nombreCliente = new mdc.textField.MDCTextField(document.querySelector('#mdc-nombre_cliente'));
-        const direccionCliente = new mdc.textField.MDCTextField(document.querySelector('#mdc-direccion_cliente'));
         const telefonoCliente = new mdc.textField.MDCTextField(document.querySelector('#mdc-telefono_cliente'));
         const centroOperacion = new mdc.textField.MDCTextField(document.querySelector('#mdc-centro_operacion'));
         const tipoDocumento = new mdc.textField.MDCTextField(document.querySelector('#mdc-tipo_documento'));
@@ -353,6 +420,13 @@
         const fecha = new mdc.textField.MDCTextField(document.querySelector('#mdc-fecha'));
         const valor = new mdc.textField.MDCTextField(document.querySelector('#mdc-valor'));
         const observacion = new mdc.textField.MDCTextField(document.querySelector('#mdc-observacion'));
+
+        // Text fields de las cards Nota Crédito (nc_) y Nueva Factura (nf_)
+        ['nc', 'nf'].forEach((prefijo) => {
+            ['centro_operacion', 'tipo_documento', 'numero_documento', 'fecha', 'valor'].forEach((campo) => {
+                new mdc.textField.MDCTextField(document.querySelector(`#mdc-${prefijo}_${campo}`));
+            });
+        });
 
         // Select
         const selectTipoDevolucion = new mdc.select.MDCSelect(document.querySelector('#mdc-select-tipo_devolucion'));
@@ -364,6 +438,13 @@
         $('#valor_formato').on('input', function() {
             let raw = $(this).val().replace(/\D/g, '');
             $('#valor').val(raw);
+            $(this).val(raw ? new Intl.NumberFormat('es-CO').format(raw) : '');
+        });
+
+        // Misma máscara para los valores de Nota Crédito y Nueva Factura (destino en data-target)
+        $('.js-valor-formato').on('input', function() {
+            let raw = $(this).val().replace(/\D/g, '');
+            $($(this).data('target')).val(raw);
             $(this).val(raw ? new Intl.NumberFormat('es-CO').format(raw) : '');
         });
 

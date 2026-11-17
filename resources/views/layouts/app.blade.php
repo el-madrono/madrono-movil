@@ -124,7 +124,7 @@
                                     src="{{ asset('vendor/icons/shopping-bag-with-dollar-sign.png') }}"></i>
                             <span class="mdc-list-item__text">Mis Pedidos</span>
                         </a>
-                        <a id="registro-facturas-anuladas" class="mdc-list-item" href="{{ route('ipbd') }}">
+                        <a id="registro-facturas-anuladas" class="mdc-list-item" href="{{ route('registro-facturas-anuladas.index') }}">
                             <span class="mdc-list-item__ripple"></span>
                             <i class="mdc-list-item__graphic mr-2" aria-hidden="true"><img class="icono"
                                     src="{{ asset('vendor/icons/commercial-ticket-of-shopping.png') }}"></i>

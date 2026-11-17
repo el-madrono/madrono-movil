@@ -22,6 +22,16 @@ class TblFacturaAnulada extends Model
         'valor',
         'tipo_devolucion',
         'observacion',
+        'nc_centro_operacion',
+        'nc_tipo_documento',
+        'nc_numero_documento',
+        'nc_fecha',
+        'nc_valor',
+        'nf_centro_operacion',
+        'nf_tipo_documento',
+        'nf_numero_documento',
+        'nf_fecha',
+        'nf_valor',
         'id_usuario_registro',
     ];
 

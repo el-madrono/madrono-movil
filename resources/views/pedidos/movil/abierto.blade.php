@@ -725,6 +725,18 @@
                 @endphp
             @endif
 
+            // Muestra el error de orden de entrega repetido
+            @if (Session::has('error_orden_entrega') && \Carbon\Carbon::now()->diffInSeconds(Session::get('error_orden_entrega')['fecha']) < 10)
+                Swal.fire({
+                    title: '{{ Session::get('error_orden_entrega')['titulo'] }}',
+                    text: '{{ Session::get('error_orden_entrega')['mensaje'] }}',
+                    icon: 'error'
+                });
+                @php
+                    Session::forget('error_orden_entrega');
+                @endphp
+            @endif
+
             // Detectar el cambio de centro de operaciones
             selectCop.listen('MDCSelect:change', (el) => {
                 if (selectCop.value) {

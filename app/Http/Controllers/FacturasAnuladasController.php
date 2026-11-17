@@ -19,7 +19,18 @@ class FacturasAnuladasController extends Controller
     public function index()
     {
         \Log::info('INDEX', ['session_id' => session()->getId(), 'success' => session('success')]);
+        
         $usuario = TblUsuario::find(Session::get('user')->id_usuario);
+        $tiposDevolucion = [
+            'Error en peso de producto',
+            'Error en unidades',
+            'Error en código',
+            'Error en precio',
+            'Por merma',
+            'Entrega fuera de tiempo',
+            'Otros conceptos'
+        ];
+        return view('registro-facturas-anuladas.index')->with(compact('usuario', 'tiposDevolucion'));
 
         if ($usuario->nivel == 'u_administrador') {
             $tiposDevolucion = [
@@ -32,12 +43,12 @@ class FacturasAnuladasController extends Controller
                 'Otros conceptos'
             ];
 
-            // var_dump(Session::get('user'));
-            // exit;
-            // if(Session::has('success')) {
-            //     Session::forget('success');
-            //     return view('registro-facturas-anuladas.index')->with(compact('usuario', 'tiposDevolucion', 'successMessage'));
-            // }
+            var_dump(Session::get('user'));
+            exit;
+            if (Session::has('success')) {
+                Session::forget('success');
+                return view('registro-facturas-anuladas.index')->with(compact('usuario', 'tiposDevolucion', 'successMessage'));
+            }
 
             return view('registro-facturas-anuladas.index')->with(compact('usuario', 'tiposDevolucion'));
         } else {
@@ -48,13 +59,12 @@ class FacturasAnuladasController extends Controller
     public function store(Request $request)
     {
         $usuario = TblUsuario::find(Session::get('user')->id_usuario);
- 
+
         if ($usuario->nivel == 'u_administrador' || $usuario->nivel == 'u_comercial') {
             // Validar los datos del formulario
             $request->validate([
                 'nit' => 'required|string|max:20',
                 'nombre_cliente' => 'required|string|max:150',
-                'direccion_cliente' => 'required|string|max:200',
                 'telefono_cliente' => 'required|string|max:20',
                 'centro_operacion' => 'required|string|max:100',
                 'tipo_documento' => 'required|string|max:50',
@@ -63,13 +73,24 @@ class FacturasAnuladasController extends Controller
                 'valor' => 'required|numeric',
                 'tipo_devolucion' => 'required|string|max:50',
                 'observacion' => 'required|string|max:1000',
+                // Nota Crédito: obligatoria. Nueva Factura: opcional
+                'nc_centro_operacion' => 'required|string|max:100',
+                'nc_tipo_documento' => 'required|string|max:50',
+                'nc_numero_documento' => 'required|string|max:30',
+                'nc_fecha' => 'required|date',
+                'nc_valor' => 'required|numeric',
+                'nf_centro_operacion' => 'nullable|string|max:100',
+                'nf_tipo_documento' => 'nullable|string|max:50',
+                'nf_numero_documento' => 'nullable|string|max:30',
+                'nf_fecha' => 'nullable|date',
+                'nf_valor' => 'nullable|numeric',
             ]);
- 
+
             // Guardar la información en la base de datos
             $facturaAnulada = new TblFacturaAnulada();
             $facturaAnulada->nit = $request->input('nit');
             $facturaAnulada->nombre_cliente = $request->input('nombre_cliente');
-            $facturaAnulada->direccion_cliente = $request->input('direccion_cliente');
+            $facturaAnulada->direccion_cliente = ''; // Campo retirado del formulario; la columna es NOT NULL
             $facturaAnulada->telefono_cliente = $request->input('telefono_cliente');
             $facturaAnulada->centro_operacion = $request->input('centro_operacion');
             $facturaAnulada->tipo_documento = $request->input('tipo_documento');
@@ -78,11 +99,16 @@ class FacturasAnuladasController extends Controller
             $facturaAnulada->valor = $request->input('valor');
             $facturaAnulada->tipo_devolucion = $request->input('tipo_devolucion');
             $facturaAnulada->observacion = $request->input('observacion');
+            foreach (['nc', 'nf'] as $prefijo) {
+                foreach (['centro_operacion', 'tipo_documento', 'numero_documento', 'fecha', 'valor'] as $campo) {
+                    $facturaAnulada->{"{$prefijo}_{$campo}"} = $request->input("{$prefijo}_{$campo}");
+                }
+            }
             $facturaAnulada->id_usuario_registro = $usuario->id_usuario;
             $facturaAnulada->save();
 
             \Log::info('STORE', ['session_id' => session()->getId(), 'success_set' => true]);
- 
+
             return redirect()->route('registro-facturas-anuladas.index')->with('success', 'Factura anulada registrada correctamente.');
         } else {
             abort(403);
